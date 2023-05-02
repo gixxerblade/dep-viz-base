@@ -1,70 +1,66 @@
-# Getting Started with Create React App
+# Dependency Graph visualization
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A properly formed construction schedule can be described as an acyclic
+directed tree with one to many roots where the tasks are nodes, and dependencies
+are edges. While not common, there is occasionally more than one relationship
+of differing type between two tasks.
 
-## Available Scripts
+Use this template project to demonstrate skills in several areas by loading
+the graph data, analyzing, and visualizing it.
 
-In the project directory, you can run:
+Expect to spend no more than a couple hours to finish this project.
 
-### `npm start`
+## Data Primitives
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The sample data provided can be directly imported from files in 'src/data'
+for experimentation purposes.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  * projects {id, name}
+  * tasks {id, name}
+  * dependencies {depend\_type, predecessor\_id, successor\_id}
 
-### `npm test`
+## Mocked API
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Data is mocked for reliability and can be accessed using the api module.
 
-### `npm run build`
+```
+    import api from './api';
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+    api.fetchProjects().then(projects => console.log(`${projects.length} projects loaded`);
+    // or
+    const projects = await api.fetchProjects();
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    const tasks = await api.fetchTasks(projectId);
+    const deps = await api.fetchDependencies(projectId);
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Requirements
 
-### `npm run eject`
+  * Fetch projects, tasks, and dependencies from api
+  * Store data in a state management library, e.g. Redux
+  * Add your own component styles, whether css files, inline, scss, etc.
+  * Compute graph statistics
+    - task count
+    - dependency count
+    - root count (i.e. a task that isn't a successor)
+    - longest path between a root and a leaf
+  * Integrate a 3rd party directed-graph visualization library
+    - Render tasks as nodes, use dependencies to create edges.
+    - Be aware most existing libraries seem adequate for small graphs
+      but don't perform well on large graphs. The solution will not
+      be assessed on the performance of the third party library.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+You are free to restructure or entirely rewrite the provided
+react components as long as it meets requirements.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Assessment Criteria
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The highest priority is seeing you show your skills as a professional
+engineer -- an incomplete solution that's well-factored, has testable code
+with documentation where necessary is better than a complete and sloppy solution.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+  * Includes required visual elements
+  * Uses state management correctly
+  * Improvement in UI/UX/usability using styles
+  * Accuracy and efficiency in computing graph statistics
+  * Any extras you feel appropriate to bring the project up to your standards
