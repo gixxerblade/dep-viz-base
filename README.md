@@ -37,7 +37,6 @@ Data is mocked for reliability and can be accessed using the api module.
 ## Requirements
 
   * Fetch projects, tasks, and dependencies from api
-  * Store data in a state management library, e.g. Redux
   * Add your own component styles, whether css files, inline, scss, etc.
   * Compute graph statistics
     - task count
