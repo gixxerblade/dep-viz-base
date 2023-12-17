@@ -57,6 +57,6 @@ describe('DependencyVisualization', () => {
     expect(screen.getByTestId('task-count')).toHaveTextContent(5);
     expect(screen.getByTestId('dep-count')).toHaveTextContent(5);
     expect(screen.getByTestId('root-count')).toHaveTextContent(1);
-    expect(screen.getByTestId('max-depth')).toHaveTextContent(0);
+    expect(screen.getByTestId('max-depth')).toHaveTextContent(4);
   });
 });

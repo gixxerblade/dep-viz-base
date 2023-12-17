@@ -18,6 +18,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
+import { calculateRoot, calculateMaxDepth } from './helpers';
 
 const StyledTableHeaderCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -33,7 +34,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:nth-of-type(odd)': {
     backgroundColor: theme.palette.action.hover,
   },
-  // hide last border
   '&:last-child td, &:last-child th': {
     border: 0,
   },
@@ -88,9 +88,8 @@ export const DependencyVisualization = () => {
     queryClient.invalidateQueries([QueryKeys.GRAPH]);
   }
 
-  // Get a set of successor ids then count them
-  const successorId = new Set(data?.deps?.map((dep) => dep.successor_id));
-  const rootCount = data?.tasks?.filter((task) => !successorId.has(task.id)).length || 0;
+  const rootLength = calculateRoot(data?.tasks, data?.deps)?.length || 0;
+  const maxDepth = calculateMaxDepth(data?.tasks, data?.deps);
 
   return (
     <Container className="depVizContainer" maxWidth="xs">
@@ -126,7 +125,7 @@ export const DependencyVisualization = () => {
           <TableBody>
             <StyledTableRow>
               <TableCell>Task Count</TableCell>
-              <TableCell data-testid="task-count" align="center">{data?.tasks?.length || 0}</TableCell>
+              <TableCell align="center" data-testid="task-count" >{data?.tasks?.length || 0}</TableCell>
             </StyledTableRow>
             <StyledTableRow>
               <TableCell>Dependency Count</TableCell>
@@ -134,11 +133,11 @@ export const DependencyVisualization = () => {
             </StyledTableRow>
             <StyledTableRow>
               <TableCell>Root Count</TableCell>
-              <TableCell align="center" data-testid="root-count">{rootCount}</TableCell>
+              <TableCell align="center" data-testid="root-count">{rootLength}</TableCell>
             </StyledTableRow>
             <StyledTableRow>
               <TableCell>Max Depth</TableCell>
-              <TableCell align="center" data-testid="max-depth">0</TableCell>
+              <TableCell align="center" data-testid="max-depth">{maxDepth}</TableCell>
             </StyledTableRow>
           </TableBody>
         </Table>
@@ -148,8 +147,8 @@ export const DependencyVisualization = () => {
           There was an error fetching the Graph Visualization
         </Typography>
       )}
-        <Typography variant="h4" sx={{ textAlign: 'center' }}>Graph Visualization</Typography>
-        <DisplayGraph nodes={data?.tasks} edges={data?.deps} />
+      <Typography variant="h4" sx={{ textAlign: 'center' }}>Graph Visualization</Typography>
+      <DisplayGraph nodes={data?.tasks} edges={data?.deps} />
     </Container>
   );
 };
