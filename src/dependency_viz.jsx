@@ -1,42 +1,155 @@
-import { React } from "react";
-
+import React, { useState } from "react";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import "./dependency_viz.css";
 import api from './api';
+import { QueryKeys } from './QueryKeys';
+import DisplayGraph from './DisplayGraph';
+import Box from '@mui/material/Box';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import { Container, Typography } from '@mui/material';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
+
+const StyledTableHeaderCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  // hide last border
+  '&:last-child td, &:last-child th': {
+    border: 0,
+  },
+}));
+
+const initialProject = { id: '', name: '' };
 
 export const DependencyVisualization = () => {
+  const [selectedProject, setSelectedProject] = useState(initialProject);
+  const queryClient = useQueryClient();
+
+  // function to fetch the projects to populate the <select />
+  const { data: projects } = useQuery({
+    queryKey: [QueryKeys.PROJECTS],
+    queryFn: () => api.fetchProjects(),
+  });
+
+  // function to fetch the deps and tasks
+  const getGraphData = async () => {
+    if (selectedProject.id) {
+      const [deps, tasks] = await Promise.all([
+        api.fetchDependencies(selectedProject.id),
+        api.fetchTasks(selectedProject.id),
+      ]);
+      if (deps?.length && tasks?.length) {
+        return { deps, tasks };
+      }
+      return null;
+    }
+  }
+
+  // useQuery funciton to fetch the deps and tasks
+  // Only ran when a project is selected
+  // refetchOnWindowFocus: false prevents the query from running again if the window loses focus
+  const { data, error } = useQuery({
+    queryKey: [QueryKeys.GRAPH, selectedProject.id],
+    queryFn: getGraphData,
+    enabled: !!selectedProject.id,
+    refetchOnWindowFocus: false,
+  });
+
+  // method used to set the selected project
+  const handleChangeProjectType = (e) => {
+    e.preventDefault();
+    // if there is a value set it otherwise set it to nothing
+    if (e.target.value) {
+      const newProject = projects.find((proj) => proj.id === e.target.value);
+      setSelectedProject(newProject);
+    } else {
+      setSelectedProject(initialProject);
+    }
+    queryClient.invalidateQueries([QueryKeys.GRAPH]);
+  }
+
+  // Get a set of successor ids then count them
+  const successorId = new Set(data?.deps?.map((dep) => dep.successor_id));
+  const rootCount = data?.tasks?.filter((task) => !successorId.has(task.id)).length || 0;
+
   return (
-    <div className="depVizContainer">
-      <h1>Project</h1>
-      <select>
-        <option/>
-        <option value="pid1">Placeholder Project Name 1</option>
-        <option value="pid2">Placeholder Project Name 2</option>
-      </select>
-
-      <h2>Graph Stats</h2>
-        <table>
-          <tbody>
-            <tr>
-              <td>Task Count</td>
-              <td>0</td>
-            </tr>
-            <tr>
-              <td>Dependency Count</td>
-              <td>0</td>
-            </tr>
-            <tr>
-              <td>Root Count</td>
-              <td>0</td>
-            </tr>
-            <tr>
-              <td>Max Depth</td>
-              <td>0</td>
-            </tr>
-          </tbody>
-        </table>
-
-      <h2>Graph Visualization</h2>
-      <div>Graph Viz Component</div>
-    </div>
+    <Container className="depVizContainer" maxWidth="xs">
+      <Typography variant="h2" sx={{ textAlign: 'center' }}>Project</Typography>
+      <Box sx={{ marginY: 2 }}>
+        <FormControl fullWidth>
+          <InputLabel id="select-label">Project Type</InputLabel>
+          <Select
+            data-testid="select"
+            label="Project Type"
+            labelId="select-label"
+            onChange={handleChangeProjectType}
+            value={selectedProject.id}
+          >
+            {/*
+            map the projects from the useQuery into the option element. Key is required in 
+            case the order comes back different.
+          */}
+            {projects?.map((project) => (
+              <MenuItem key={project.id} value={project.id}>{project.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+      <TableContainer component={Paper} sx={{ marginY: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <StyledTableHeaderCell>Graph Stats</StyledTableHeaderCell>
+              <StyledTableHeaderCell align="center">Value</StyledTableHeaderCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <StyledTableRow>
+              <TableCell>Task Count</TableCell>
+              <TableCell data-testid="task-count" align="center">{data?.tasks?.length || 0}</TableCell>
+            </StyledTableRow>
+            <StyledTableRow>
+              <TableCell>Dependency Count</TableCell>
+              <TableCell align="center" data-testid="dep-count">{data?.deps?.length || 0}</TableCell>
+            </StyledTableRow>
+            <StyledTableRow>
+              <TableCell>Root Count</TableCell>
+              <TableCell align="center" data-testid="root-count">{rootCount}</TableCell>
+            </StyledTableRow>
+            <StyledTableRow>
+              <TableCell>Max Depth</TableCell>
+              <TableCell align="center" data-testid="max-depth">0</TableCell>
+            </StyledTableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {error && (
+        <Typography sx={{ color: 'red' }} variant="h2">
+          There was an error fetching the Graph Visualization
+        </Typography>
+      )}
+        <Typography variant="h4" sx={{ textAlign: 'center' }}>Graph Visualization</Typography>
+        <DisplayGraph nodes={data?.tasks} edges={data?.deps} />
+    </Container>
   );
 };

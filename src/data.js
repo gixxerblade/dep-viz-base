@@ -10,18 +10,18 @@ new Server({
 
     this.get("/projects/", () => {
       return projects;
-    }, {timing: 1000});
+    }, { timing: 1000 });
 
     this.get("/projects/:projectid/tasks/", (schema, request) => {
-      return tasks[request.params.projectid].map(t => {return {...t}}) || [];
-    }, {timing: 2000});
+      return tasks[request.params.projectid].map(t => { return { ...t } }) || [];
+    }, { timing: 2000 });
 
     this.get("/projects/:projectid/dependencies", (schema, request) => {
-      if (dependencies.hasOwnProperty(request.params.projectid)) {
+      if (Object.prototype.hasOwnProperty.call(dependencies, request.params.projectid)) {
         return dependencies[request.params.projectid];
       } else {
-         return new Response(404, { errors: ["Project not found"]})
+        return new Response(404, { errors: ["Project not found"] })
       }
-    }, {timing: 2000});
+    }, { timing: 2000 });
   }
 });

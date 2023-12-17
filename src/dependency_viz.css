@@ -8,3 +8,17 @@
 .depVizContainer {
   margin: 20px;
 }
+
+.nodes {
+	fill: darkgray;
+}
+.nodes text {
+	fill: white;
+  overflow: hidden;
+}
+
+path {
+	stroke: black;
+	fill: black;
+	stroke-width: 1.5px;
+}
