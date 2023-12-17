@@ -65,7 +65,7 @@ export const DependencyVisualization = () => {
     }
   }
 
-  // useQuery funciton to fetch the deps and tasks
+  // useQuery function to fetch the deps and tasks
   // Only ran when a project is selected
   // refetchOnWindowFocus: false prevents the query from running again if the window loses focus
   const { data, error } = useQuery({
@@ -85,6 +85,8 @@ export const DependencyVisualization = () => {
     } else {
       setSelectedProject(initialProject);
     }
+    // invalidate cache so it can refetch with fresh data
+    // helpful when selecting a new project
     queryClient.invalidateQueries([QueryKeys.GRAPH]);
   }
 
