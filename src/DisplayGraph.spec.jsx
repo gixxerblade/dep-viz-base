@@ -4,12 +4,7 @@ import DisplayGraph from './DisplayGraph';
 import tasks from './data/tasks';
 import dependencies from './data/dependencies';
 
-// mocking library since rendering the graph is not part of the testing plan
-jest.mock('dagre-d3-react', () => {
-  return function DummyDagreGraph() {
-    return <div data-testid="mock-graph"></div>;
-  };
-});
+jest.mock('dagre-d3-react');
 
 describe('DisplayGraph', () => {
   // eslint-disable-next-line jest/no-focused-tests
@@ -24,6 +19,6 @@ describe('DisplayGraph', () => {
 
   it('does not render the graph when props are empty', async () => {
     const { container } = render(<DisplayGraph nodes={[]} edges={[]} />);
-    expect(container).toHaveTextContent('Select a Project Type');
+    expect(container).toHaveTextContent(/select a project type/i);
   });
 });

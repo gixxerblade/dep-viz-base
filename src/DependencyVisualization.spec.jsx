@@ -7,18 +7,9 @@ import userEvent from '@testing-library/user-event'
 import dependencies from './data/dependencies';
 import tasks from './data/tasks';
 
-jest.mock('@tanstack/react-query', () => ({
-  useQuery: jest.fn(),
-  useQueryClient: jest.fn(() => ({ invalidateQueries: jest.fn() })),
-}));
-
+jest.mock('@tanstack/react-query');
 jest.mock('./api');
-
-jest.mock('dagre-d3-react', () => {
-  return function DummyDagreGraph() {
-    return <div data-testid="mock-graph"></div>;
-  };
-});
+jest.mock('dagre-d3-react');
 
 describe('DependencyVisualization', () => {
   it('populates the project dropdown with fetched projects', () => {
